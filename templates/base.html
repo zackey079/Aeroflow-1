@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AeroFlow — Airline Management{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="mobile-head"><a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-icon">✈</span><span>AeroFlow</span></a><button class="menu-toggle" onclick="document.body.classList.toggle('menu-open')">☰</button></header>
+  <aside class="sidebar">
+    <div class="brand-wrap"><a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-icon">✈</span><span>AeroFlow</span></a></div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}" class="{% if request.path=='/' %}active{% endif %}"><span>▦</span> Dashboard</a>
+      <a href="{{ url_for('flights_page') }}" class="{% if request.path.startswith('/flights') %}active{% endif %}"><span>➤</span> Flights</a>
+      <a href="{{ url_for('pilots_page') }}" class="{% if request.path.startswith('/pilots') %}active{% endif %}"><span>♙</span> Pilots</a>
+      <a href="{{ url_for('aircraft_page') }}" class="{% if request.path.startswith('/aircraft') %}active{% endif %}"><span>✈</span> Aircraft</a>
+      {% if is_admin %}<a href="{{ url_for('admin_activity') }}" class="{% if request.path.startswith('/admin') %}active{% endif %}"><span>▤</span> User Activity Report</a>{% endif %}
+    </nav>
+    <div class="sidebar-foot"><div class="flight-line">- - - - - - - - - - - -</div><div>Signed in as <strong>{{ current_user.username if current_user else "" }}</strong></div><form method="post" action="{{ url_for('logout') }}"><button type="submit" style="margin-top:10px">Sign out</button></form><div>Private workspace · isolated account data</div></div>
+  </aside>
+  <main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<div class="flash-wrap">{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body></html>

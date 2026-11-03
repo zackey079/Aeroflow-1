@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header"><div><h1>Operations overview</h1><p>Real-time snapshot of your network, fleet and crew.</p></div></div>
+<div class="stats-grid">{% for label,value,icon in stats %}<div class="panel stat-card"><div class="stat-label">{{ label }}<span class="accent-icon">{{ icon }}</span></div><div class="stat-value">{{ value }}</div></div>{% endfor %}</div>
+<div class="dashboard-grid">
+  <section class="panel chart-panel"><h2>Flights by status</h2><div class="chart">
+    {% set maxval = ([counts.values()|max, 1]|max) %}
+    {% for s in statuses %}<div class="bar-group"><div class="bar-value">{{ counts[s] }}</div><div class="bar" style="height:{{ (counts[s]/maxval*175)|int }}px" data-status="{{ s }}"></div><div class="bar-label">{{ s }}</div></div>{% endfor %}
+  </div></section>
+  <section class="panel departures"><div class="section-head"><h2>Next departures</h2><a href="{{ url_for('flights_page') }}">All →</a></div>
+    {% if not upcoming %}<p class="muted empty-text">No upcoming departures.</p>{% endif %}
+    {% for f in upcoming %}<div class="departure-row"><div><strong>{{ f.flight_number }} · {{ f.origin }} → {{ f.destination }}</strong><small>{{ fmt(f.departure_time) }} · {{ ac.get(f.aircraft_id,'—') }} · {{ pl.get(f.pilot_id,'Unassigned') }}</small></div><span class="status {{ f.status|lower|replace(' ','-') }}">{{ f.status }}</span></div>{% endfor %}
+  </section>
+</div>
+{% endblock %}
