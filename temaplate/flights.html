@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Flights — AeroFlow{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>Flights</h1><p>Manage schedules, crew assignments and live status.</p></div><button class="btn primary" onclick="openModal('flight-modal')">＋ New flight</button></div>
+<form class="panel filters" method="get"><input class="field search-field" name="q" value="{{ q }}" placeholder="⌕  Search flight number or airport…">
+<select class="field" name="status"><option>All</option>{% for s in statuses %}<option {% if status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+<select class="field" name="pilot"><option value="All">All pilots</option>{% for p in pilots %}<option value="{{ p.id }}" {% if pilot_filter==p.id %}selected{% endif %}>{{ p.name }}</option>{% endfor %}</select><button class="btn secondary">Filter</button></form>
+<div class="panel table-wrap"><table><thead><tr><th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th><th>Aircraft</th><th>Pilot</th><th>Status</th><th></th></tr></thead><tbody>
+{% for f in flights %}<tr><td class="display-font">{{ f.flight_number }}</td><td>{{ f.origin }} → {{ f.destination }}</td><td class="muted">{{ fmt(f.departure_time) }}</td><td class="muted">{{ fmt(f.arrival_time) }}</td><td>{{ f.registration or '—' }}</td><td>{% if f.pilot_name %}{{ f.pilot_name }} <small class="muted">{{ f.pilot_code }}</small>{% else %}<span class="muted">Unassigned</span>{% endif %}</td><td><span class="status {{ f.status|lower|replace(' ','-') }}">{{ f.status }}</span></td><td class="actions"><button class="icon-btn" title="Edit" onclick='editFlight({{ f|tojson }})'>✎</button><form method="post" action="{{ url_for('delete_record',kind='flights',rid=f.id) }}" onsubmit="return confirm('Delete flight {{ f.flight_number }}?')"><button class="icon-btn danger" title="Delete">⌫</button></form></td></tr>{% else %}<tr><td colspan="8" class="empty-text">No flights match your filters.</td></tr>{% endfor %}
+</tbody></table></div>
+<dialog id="flight-modal" class="modal"><form method="post" action="{{ url_for('save_record',kind='flights') }}" class="modal-form">
+<div class="modal-head"><h2 id="flight-title">New flight</h2><button type="button" class="close-btn" onclick="closeModal('flight-modal')">×</button></div>
+<input type="hidden" name="id" id="f-id">
+<label class="full">Flight number<input class="field" name="flight_number" id="f-number" required placeholder="AF707"></label>
+<label>Origin<input class="field" name="origin" id="f-origin" maxlength="4" required placeholder="DEL"></label><label>Destination<input class="field" name="destination" id="f-destination" maxlength="4" required placeholder="BOM"></label>
+<label>Departure<input class="field" type="datetime-local" name="departure_time" id="f-departure" required></label><label>Arrival<input class="field" type="datetime-local" name="arrival_time" id="f-arrival" required></label>
+<label>Aircraft<select class="field" name="aircraft_id" id="f-aircraft"><option value="">None</option>{% for a in aircraft %}<option value="{{ a.id }}">{{ a.registration }} · {{ a.model }}</option>{% endfor %}</select></label>
+<label>Status<select class="field" name="status" id="f-status">{% for s in statuses %}<option>{{ s }}</option>{% endfor %}</select></label>
+<label class="full">Pilot<select class="field" name="pilot_id" id="f-pilot"><option value="">Unassigned</option>{% for p in pilots %}<option value="{{ p.id }}">{{ p.pilot_code }} · {{ p.name }}</option>{% endfor %}</select></label>
+<div class="modal-actions full"><button type="button" class="btn ghost" onclick="closeModal('flight-modal')">Cancel</button><button class="btn primary">Save flight</button></div>
+</form></dialog>
+{% endblock %}
